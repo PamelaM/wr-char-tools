@@ -65,7 +65,8 @@ def _calc_col_lens(rows, col_lens):
 
 def _print_row_as_text(row, fmt):
     try:
-        print fmt % tuple(row)
+        out = fmt % tuple(row)
+        print out.rstrip()
     except:
         print "FMT: %r" % fmt
         print "ROW: %r" % row

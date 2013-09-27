@@ -287,11 +287,14 @@ class PrintrowsTestCase(unittest.TestCase):
         pairs =  map(None, wlens, cols)
         bad_pairs = [(w, c) for w, c in pairs if w>c]
         self.failIf(bad_pairs, "%s Cols too long %s\n%s" % (len(bad_pairs), bad_pairs, line))
-                
+        self.assertEqual(line, line.rstrip(), "\ngot     : %r\nstripped: %r" % (line, line.rstrip())) # make sure there aren't trailing spaces
+        
     def test_spaces(self):
         rows = []
         rows.append(["Campaign ID", "Campaign Name", "Bulkmail ID", "Bulkmail Name"])
         rows.append([180,"PartnersDec172012NewsletterBase",13,"BulkSPDec172012NewsletterFreeAccred"])
+        rows.append([180,"PartnersDec172012NewsletterBase",13,"foofoo"])
+        rows.append(["    leadingspaces","PartnersDec172012NewsletterBase",13,"foofoo"])
         
         sout = printrows.sprint_rows_as_text(rows)
         self.assertTrue(sout, sout)
@@ -369,7 +372,8 @@ class PrintrowsTestCase(unittest.TestCase):
         self.assertTrue(rows[0].split()[2]=="C", sout)
 
     def test_width(self):
-        EXPECTED_LEN = 2+3+4+(2*2)
+        MAX_LEN = 2+3+4+(2*2)
+        MIN_LEN = 2+3+1+(2*2)
         EXPECTED_ROWS = 3
         sout = printrows.sprint_rows_as_text([("A", "B", "C"),
                                                (22, "QQQ", "QQQQ")], 
@@ -378,8 +382,14 @@ class PrintrowsTestCase(unittest.TestCase):
         rows = sout.split("\n")
         self.assertTrue(len(rows)==EXPECTED_ROWS, "len: %s\n%s" % (len(rows), sout))
         self.failIf(rows[EXPECTED_ROWS-1].strip(), sout)
+
+        saw_max = False
         for idx in range(EXPECTED_ROWS-1):
-            self.assertTrue(len(rows[idx])==EXPECTED_LEN, "%s: Expected: %s, Got: %s\n%s" % (idx, EXPECTED_LEN, len(rows[idx]), repr(sout)))
+            self.assertTrue(len(rows[idx])<=MAX_LEN, "%s: Expected: %s, Got: %s\n%s" % (idx, MAX_LEN, len(rows[idx]), repr(sout)))
+            self.assertTrue(len(rows[idx])>=MIN_LEN, "%s: Expected: %s, Got: %s\n%s" % (idx, MIN_LEN, len(rows[idx]), repr(sout)))
+            if len(rows[idx])==MAX_LEN:
+                saw_max = True
+        self.assertTrue(saw_max)
 
     def test_unicode(self):
          rows = [["A", "B", "C", "D", "E", "F"],
