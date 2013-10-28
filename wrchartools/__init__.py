@@ -1,2 +1,2 @@
 #
-all = ["makeutf8", "printrows", "stdwrapper", "anglicize"]
+all = ["makeutf8", "printrows", "stdwrapper", "anglicize", "asciihist"]
